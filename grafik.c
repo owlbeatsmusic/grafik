@@ -8,6 +8,33 @@
 #include <fcntl.h>      // file control
 #include <stdio.h>      // 
 
+typedef struct {
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;
+} Color;
+
+uint8_t *fb_data;
+int fb_width;
+int fb_height;
+
+void grafik_draw_pixel(int x, int y, Color color) {
+	int offset = (y * fb_width  + x) * 4;
+
+	fb_data[offset+0] = color.b;
+	fb_data[offset+1] = color.g; 
+	fb_data[offset+2] = color.r; 
+	fb_data[offset+3] = color.a;  
+}
+
+void grafik_fill_rect(int x, int y, int width, int height, Color color) {
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width/2; x++) {
+			grafik_draw_pixel(x, y, color);
+		}
+	}
+}
 
 int main() {
 	
@@ -28,10 +55,13 @@ int main() {
 		return EXIT_FAILURE;
 	}
 
+	fb_width  = vinfo.xres_virtual;
+	fb_height = vinfo.yres_virtual;
+
 	// Map framebuffer memory to user space 
 	// (so that read and write)
-	size_t fb_data_size = vinfo.yres_virtual *vinfo.xres_virtual * vinfo.bits_per_pixel / 8;
-	uint8_t *fb_data = (uint8_t *)mmap(NULL, fb_data_size, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, (off_t)0);	
+	size_t fb_data_size = fb_height * fb_width * vinfo.bits_per_pixel / 8;
+	fb_data = (uint8_t *)mmap(NULL, fb_data_size, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, (off_t)0);	
 	if (fb_data == MAP_FAILED) {
 		perror("error mapping framebuffer to memory");
 		close(fb_fd);
@@ -42,14 +72,9 @@ int main() {
 	// to black)
 	memset(fb_data, 0, fb_data_size);
 
-	int x = 100;
-	int y = 100;
-	int offset = (y * vinfo.xres + x) * 4;
-
-	fb_data[offset+3] = 0;   // (alpha) may not ebe needed
-	fb_data[offset+2] = 255; // red
-	fb_data[offset+1] = 255; // green
-	fb_data[offset+0] = 255; // blue
+	Color color_red  = {255, 0, 0, 0};
+	grafik_draw_pixel(100, 100, color_red);
+	grafik_fill_rect(150, 150, 100, 100, color_red);
 
 	// unmap and close
 	munmap(fb_data, fb_data_size);
