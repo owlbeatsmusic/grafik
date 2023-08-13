@@ -41,5 +41,6 @@ int main() {
 	// clear screen from memory (set screen
 	// to black)
 	memset(fb_ptr, 0, fb_data_size);
-	
+
+
 }
