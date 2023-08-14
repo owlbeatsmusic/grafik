@@ -15,6 +15,7 @@ typedef struct {
 	uint8_t a;
 } Color;
 
+
 uint8_t *fb_data;
 int fb_width;
 int fb_height;
