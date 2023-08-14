@@ -30,9 +30,10 @@ int grafik_log_print(char *file_path, char *input) {
 	strftime(formatted_time, sizeof(formatted_time), "[%Y-%m-%d %H:%M:%S]: ", local_time);
 
 	// combine final string
-	char final_string[sizeof(formatted_time) + sizeof(input)];
+	char final_string[sizeof(formatted_time) + sizeof(input) + 1];
 	strcat(final_string, formatted_time);
 	strcat(final_string, input);
+	strcat(final_string, "\n");
 
 
 	if (fputs(final_string, log_file) == EOF) {

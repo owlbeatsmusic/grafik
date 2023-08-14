@@ -26,7 +26,6 @@ int fb_width;
 int fb_height;
 
 void grafik_draw_pixel(int x, int y, Color color) {
-	//int offset = (y * fb_width + x + 19) * 4;
 	int offset = (y * (fb_width+ 10) + x) * 4;
 
 	fb_data[offset+0] = color.b;
@@ -46,7 +45,6 @@ void grafik_fill_rect(int x, int y, int width, int height, Color color) {
 void *keyboard_input_thread(void *arg) {
 	grafik_input_keyboard_start();	
 }
-
 void *mouse_input_thread(void *arg) {
 	grafik_input_mouse_start();
 }
