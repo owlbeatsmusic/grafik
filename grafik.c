@@ -19,8 +19,13 @@ uint8_t *fb_data;
 int fb_width;
 int fb_height;
 
+int x_transform_to_top_left(int x) {
+	return x;
+}
+
 void grafik_draw_pixel(int x, int y, Color color) {
-	int offset = (y * fb_width  + x) * 4;
+	//int offset = (y * fb_width + x + 19) * 4;
+	int offset = (y * (fb_width+ 10) + x) * 4;
 
 	fb_data[offset+0] = color.b;
 	fb_data[offset+1] = color.g; 
@@ -30,7 +35,7 @@ void grafik_draw_pixel(int x, int y, Color color) {
 
 void grafik_fill_rect(int x, int y, int width, int height, Color color) {
 	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width/2; x++) {
+		for (int x = 0; x < width; x++) {
 			grafik_draw_pixel(x, y, color);
 		}
 	}
@@ -58,6 +63,7 @@ int main() {
 	fb_width  = vinfo.xres_virtual;
 	fb_height = vinfo.yres_virtual;
 
+
 	// Map framebuffer memory to user space 
 	// (so that read and write)
 	size_t fb_data_size = fb_height * fb_width * vinfo.bits_per_pixel / 8;
@@ -73,8 +79,22 @@ int main() {
 	memset(fb_data, 0, fb_data_size);
 
 	Color color_red  = {255, 0, 0, 0};
-	grafik_draw_pixel(100, 100, color_red);
-	grafik_fill_rect(150, 150, 100, 100, color_red);
+	Color color_green  = {0, 255, 0, 0};
+	Color color_blue  = {0, 0, 255, 0};
+	Color color_white  = {255, 255, 255, 0};
+	grafik_draw_pixel(0, 0, color_red);
+	grafik_draw_pixel(0, 1, color_green);
+	grafik_draw_pixel(0, 2, color_blue);
+	grafik_draw_pixel(1, 0, color_red);
+	grafik_draw_pixel(1, 1, color_green);
+	grafik_draw_pixel(1, 2, color_blue);
+	grafik_draw_pixel(2, 0, color_red);
+	grafik_draw_pixel(2, 1, color_green);
+	grafik_draw_pixel(2, 2, color_blue);
+	grafik_draw_pixel(3, 0, color_white);
+	grafik_draw_pixel(3, 1, color_white);
+	grafik_draw_pixel(3, 2, color_white);
+	//grafik_fill_rect(150, 150, 100, 100, color_red);
 
 	// unmap and close
 	munmap(fb_data, fb_data_size);
