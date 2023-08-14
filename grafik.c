@@ -1,5 +1,6 @@
 #include "grafik_input/keyboard.h" // custom keyboard input
 #include "grafik_input/mouse.h"    // cutsom mouse input
+#include "grafik_log/log.h"        // custom logging
 #include <sys/ioctl.h>             // I/O control
 #include <sys/mman.h>              // Memory mapping files into memory
 #include <linux/fb.h>              // to use the framebuffer device
@@ -23,30 +24,6 @@ typedef struct {
 uint8_t *fb_data;
 int fb_width;
 int fb_height;
-
-int print_to_log_internal(char* input) {
-	FILE *log_file = fopen("log.txt", "w");
-	if (log_file == NULL) {
-		perror("error: failed to open file");
-		return -1;
-	}
-
-	time_t current_time;
-	struct tm *local_time;
-	char formatted_time[80];
-	
-	current_time = time(NULL);
-	local_time = localtime(&current_time);
-
-	strftime(formatted_time, sizeof(formatted_time), "[%Y-%m-%d %H:%M%S]: ", local_time);
-
-	// format input string
-	if (fputs(formatted_time, log_file) == EOF) {
-		perror("error while writing to log file");
-		fclose(log_file);
-		return -1;
-	}
-}
 
 void grafik_draw_pixel(int x, int y, Color color) {
 	//int offset = (y * fb_width + x + 19) * 4;
@@ -112,6 +89,7 @@ int main() {
 	memset(fb_data, 0, fb_data_size);
 	
 	// start input
+	grafik_log_create("log.txt");
 	pthread_t keyboard_thread, mouse_thread;
 	if (pthread_create(&keyboard_thread, NULL, keyboard_input_thread, NULL)) {
 		perror("error: failed to create keyboard thread");
