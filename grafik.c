@@ -34,9 +34,9 @@ void grafik_draw_pixel(int x, int y, Color color) {
 }
 
 void grafik_fill_rect(int x, int y, int width, int height, Color color) {
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			grafik_draw_pixel(x, y, color);
+	for (int local_y = 0; local_y < height; local_y++) {
+		for (int local_x = 0; local_x < width; local_x++) {
+			grafik_draw_pixel(x+local_x, y+local_y, color);
 		}
 	}
 }
@@ -77,25 +77,19 @@ int main() {
 	// clear screen from memory (set screen
 	// to black)
 	memset(fb_data, 0, fb_data_size);
-
+	
 	Color color_red  = {255, 0, 0, 0};
 	Color color_green  = {0, 255, 0, 0};
 	Color color_blue  = {0, 0, 255, 0};
 	Color color_white  = {255, 255, 255, 0};
 	grafik_draw_pixel(0, 0, color_red);
-	grafik_draw_pixel(0, 1, color_green);
-	grafik_draw_pixel(0, 2, color_blue);
-	grafik_draw_pixel(1, 0, color_red);
-	grafik_draw_pixel(1, 1, color_green);
-	grafik_draw_pixel(1, 2, color_blue);
-	grafik_draw_pixel(2, 0, color_red);
-	grafik_draw_pixel(2, 1, color_green);
-	grafik_draw_pixel(2, 2, color_blue);
-	grafik_draw_pixel(3, 0, color_white);
-	grafik_draw_pixel(3, 1, color_white);
-	grafik_draw_pixel(3, 2, color_white);
-	//grafik_fill_rect(150, 150, 100, 100, color_red);
-
+	
+	for (int i = 0; i < 300; i+= 1) {
+		memset(fb_data, 0, fb_data_size);
+		grafik_fill_rect(150+i, 150, 100, 100, color_red);
+		usleep(100000);
+		
+	}
 	// unmap and close
 	munmap(fb_data, fb_data_size);
 	close(fb_fd);
