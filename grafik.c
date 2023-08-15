@@ -115,6 +115,8 @@ int main() {
 		usleep(100000);
 	}
 	// unmap and close
+	pthread_join(keyboard_thread, NULL);
+	pthread_join(mouse_thread, NULL);
 	munmap(fb_data, fb_data_size);
 	close(fb_fd);
 
