@@ -41,7 +41,7 @@ void *event_thread(void *arg) {
 	
 	struct input_event ev;
 	while (1) {
-		printf("loop: %s\n", event_device_path);
+		//printf("loop: %s\n", event_device_path);
 		ssize_t n = read(fd, &ev, sizeof(struct input_event));
 		if (n == (ssize_t)-1) {
 			perror("error reading input");
@@ -62,7 +62,6 @@ int main() {
 
 	
 	int devices = 0;
-	int mouses = 0;
 
 	// event devices
 	DIR *dir = opendir("/dev/input");
