@@ -36,10 +36,12 @@ void *event_thread(void *arg) {
 		return 0;
 	
 	}
+
+	
 	
 	struct input_event ev;
-	while (current_event_device_number == -1) {
-		//printf("loop: %s\n", event_device_path);
+	while (1) {
+		printf("loop: %s\n", event_device_path);
 		ssize_t n = read(fd, &ev, sizeof(struct input_event));
 		if (n == (ssize_t)-1) {
 			perror("error reading input");
@@ -58,18 +60,19 @@ void *event_thread(void *arg) {
 
 int main() {
 
-	// first get how many event devices exsist
 	
 	int devices = 0;
-	
+	int mouses = 0;
+
+	// event devices
 	DIR *dir = opendir("/dev/input");
-	if (dir == NULL) {
+	if (dir== NULL) {
 		perror("error opening directory(/dev/input");
 		return EXIT_FAILURE;
 	}
-	const char *prefix = "event";
-	struct dirent *entry;
 	
+	char *prefix = "event";
+	struct dirent *entry;
 	while ((entry = readdir(dir)) != NULL) {
 		if (strncmp(entry->d_name, prefix, strlen(prefix)) == 0) {
 			devices++;
@@ -79,15 +82,15 @@ int main() {
 
 	printf("devices=%d\n", devices);
 
-
 	pthread_t threads[devices];
 	for (int i = 0; i < devices; i++) {
 		struct thread_args args;
-		args.event_device_number = i-1;;
+		args.event_device_number = i;
 		if (pthread_create(&threads[i], NULL, event_thread, (void *)&args) != 0) {
 			perror("error: failed to create thread");
 			return EXIT_FAILURE;
 		}
+		usleep(10000);
 	}
 	
 	char input_char;
@@ -99,8 +102,7 @@ int main() {
 	printf("keyboard input device detected: \"/dev/input/event%d\"\n", current_event_device_number);
 
 	for (int i = 0; i < devices; i++) {
-		pthread_join(threads[i], NULL);
-		printf("thread: %d joined.\n", i);
+		pthread_cancel(threads[i]);
 	}
 
 	return 0;
