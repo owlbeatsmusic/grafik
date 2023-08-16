@@ -1,6 +1,7 @@
 /* 
 	"idd" for short
 */
+#include "../grafik_config/config.h"
 #include <linux/input.h>
 #include <pthread.h>
 #include <stdlib.h>
@@ -99,6 +100,8 @@ int main() {
 	printf("input_char=%c\n", input_char);	
 	fflush(stdout);
 	printf("keyboard input device detected: \"/dev/input/event%d\"\n", current_event_device_number);
+	
+	
 
 	for (int i = 0; i < devices; i++) {
 		pthread_cancel(threads[i]);

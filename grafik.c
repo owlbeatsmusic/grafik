@@ -1,4 +1,5 @@
 #include "grafik_input/keyboard.h" // custom keyboard input
+#include "grafik_config/config.h"  // .ini config tool
 #include "grafik_input/mouse.h"    // cutsom mouse input
 #include "grafik_log/log.h"        // custom logging
 #include <sys/ioctl.h>             // I/O control
@@ -50,7 +51,9 @@ void *mouse_input_thread(void *arg) {
 }
 
 int main() {
-	
+
+	printf("event_device: %s\n", grafik_config_get_string("grafik_config/config.ini", "event_device"));
+
 	// opening the framebuffer device (file descriptor) 
 	// in read/write
 	int fb_fd = open("/dev/fb0", O_RDWR);
