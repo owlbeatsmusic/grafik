@@ -1,5 +1,5 @@
 # Grafik
-Small graphcis library using linux framebuffer. Made for learing. (The grafik_input, grafik_log & grafik_config *should* both work separately in other projetcs.) 
+Small graphcis library using linux framebuffer. Also includes custol logging, .ini read/write and input. Made for learing. (The grafik_input, grafik_log & grafik_config *should* both work separately in other projetcs.) 
 
 ### Setup
 ```console
