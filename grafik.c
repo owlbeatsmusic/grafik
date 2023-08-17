@@ -52,7 +52,7 @@ void *mouse_input_thread(void *arg) {
 
 int main() {
 
-	printf("event_device: %s\n", grafik_config_get_string("grafik_config/config.ini", "mouse_device"));
+	//printf("event_device: %s\n", grafik_config_get_string("grafik_config/config.ini", "mouse_device"));
 
 	// opening the framebuffer device (file descriptor) 
 	// in read/write
@@ -112,10 +112,10 @@ int main() {
 	Color color_white  = {255, 255, 255, 0};
 	//grafik_draw_pixel(0, 0, color_red);
 	
-	for (int i = 0; i < 300; i+= 1) {
+	for (int i = 0; i < 300; i += 30) {
 		memset(fb_data, 0, fb_data_size);
 		grafik_fill_rect(150+i, 150, 100, 100, color_red);
-		//usleep(100000);
+		sleep(1);
 	}
 	// unmap and close
 	pthread_cancel(keyboard_thread);

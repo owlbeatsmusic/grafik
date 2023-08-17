@@ -5,11 +5,11 @@
 
 //void grafik_config_add_string(char *file_path, char *key, char *value) {}
 
-char *grafik_config_get_string(char *file_path, char *key) {
+int grafik_config_get_string(char *file_path, char *key, char *destination_buffer) {
 	FILE *file = fopen(file_path, "r"); 
 	if (file == NULL) {
 		printf("error: failed to open file(%s)\n", file_path);
-		return NULL;
+		return -1;
 	}
 
 	fseek(file, 0L, SEEK_END);
@@ -19,15 +19,13 @@ char *grafik_config_get_string(char *file_path, char *key) {
 	char *file_content = (char *)malloc(file_length * sizeof(char) + 1);
 	if (file_content == NULL) {
 		perror("error: Memory allocation failed");
-		return NULL;
+		return -1;
 	}
 	
 	// use exact same line when wanting to get next line
 	// TODO: use while loop to create a string of entire file
 	fread(file_content, file_length, 1, file);
 	file_content[file_length] = '\0';
-
-	printf("file_content=\"%s\"\nkey=\"%s\"\n", file_content, key);
 	
 	char *result = strstr(file_content, key);
 	
@@ -41,7 +39,6 @@ char *grafik_config_get_string(char *file_path, char *key) {
 	int j = 0;
 	while (file_content[position+j] != '\n' && file_content[position+j] != '\0') {
 		if (file_content[position+j] != key[j] && file_content[position+j] != '=') {
-			printf("%d : %c\n", j, file_content[position+j]);
 			line_buf[index] = file_content[position+j];
 			index++;
 		} 
@@ -49,11 +46,14 @@ char *grafik_config_get_string(char *file_path, char *key) {
 	}
 	line_buf[index] = '\0';
 
-	printf("line_buf=%s\n", line_buf);
-	printf("index=%d\n", position);
-
 	free(file_content);
-	fclose(file);			
+	fclose(file);	
+
+	for (int i = 0; i < sizeof(line_buf) / sizeof(char); i++) {
+		destination_buffer[i] = line_buf[i];
+	}
+
+	return 0;
 }
 
 int grafik_config_set_string(char *file_path, char *key, char *value) {	

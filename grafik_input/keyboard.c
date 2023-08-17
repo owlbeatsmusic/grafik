@@ -1,3 +1,4 @@
+#include "../grafik_config/config.h"
 #include "../grafik_log/log.h"
 #include <linux/input.h>
 #include <stdlib.h>
@@ -7,20 +8,26 @@
 
 int grafik_input_keyboard_start() {
 	
+	char *file_path = (char *)malloc(128 * sizeof(char));
+	grafik_config_get_string("grafik_config/config.ini", "event_device", file_path);
+
 	grafik_log_print("log.txt", "keyboard input started");
 
-	int fd = open("/dev/input/event9", O_RDONLY);
+	int fd = open(file_path, O_RDONLY);
 	if (fd == -1) {
-		perror("error opening dev/input0 device");
+		printf("error opening \"%s\" device\n", file_path);
+		free(file_path);
 		return -1;
 	}
+
+	free(file_path);
 
 	struct input_event ev;
 
 	while (1) {	
 		ssize_t n = read(fd, &ev, sizeof(struct input_event));
 		if (n == (ssize_t)-1) {
-			perror("error reading event (input0)");
+			perror("error reading event");
 			close(fd);
 			return -1;
 		}
