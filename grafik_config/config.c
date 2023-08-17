@@ -5,7 +5,12 @@
 
 //void grafik_config_add_string(char *file_path, char *key, char *value) {}
 
-int grafik_config_get_string(char *file_path, char *key, char *destination_buffer) {
+int grafik_config_get_string(char *file_path, char *key, char *destination_buffer, int buffer_size) {
+	char line_buf[60];
+	if (buffer_size < (int)sizeof(line_buf)) {
+		printf("error: destination_buffer too small, need to be over %ld\n", sizeof(line_buf) / sizeof(char));
+		return -1;
+	}
 	FILE *file = fopen(file_path, "r"); 
 	if (file == NULL) {
 		printf("error: failed to open file(%s)\n", file_path);
@@ -34,7 +39,6 @@ int grafik_config_get_string(char *file_path, char *key, char *destination_buffe
 		position = result - file_content;
 	}
 
-	char line_buf[128];
 	int index = 0;
 	int j = 0;
 	while (file_content[position+j] != '\n' && file_content[position+j] != '\0') {
@@ -49,7 +53,7 @@ int grafik_config_get_string(char *file_path, char *key, char *destination_buffe
 	free(file_content);
 	fclose(file);	
 
-	for (int i = 0; i < sizeof(line_buf) / sizeof(char); i++) {
+	for (int i = 0; i < sizeof(line_buf); i++) {
 		destination_buffer[i] = line_buf[i];
 	}
 
@@ -62,8 +66,6 @@ int grafik_config_set_string(char *file_path, char *key, char *value) {
 		printf("error: failed to open file(%s)\n", file_path);
 		return -1;
 	}
-
-
 
 	fclose(file);
 }

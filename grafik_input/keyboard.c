@@ -8,8 +8,9 @@
 
 int grafik_input_keyboard_start() {
 	
-	char *file_path = (char *)malloc(128 * sizeof(char));
-	grafik_config_get_string("grafik_config/config.ini", "event_device", file_path);
+	int file_path_size = 64;
+	char *file_path = (char *)malloc(file_path_size * sizeof(char));
+	grafik_config_get_string("grafik_config/config.ini", "event_device", file_path, file_path_size);
 
 	grafik_log_print("log.txt", "keyboard input started");
 
@@ -33,7 +34,7 @@ int grafik_input_keyboard_start() {
 		}
 
 		if (ev.type == EV_KEY && ev.value == 1) {
-			char *log_message = (char *) malloc(20 * sizeof(char));
+			char *log_message = (char *) malloc(128 * sizeof(char));
 			sprintf(log_message, "keyboard_input: keycode=%d", ev.code);
 			grafik_log_print("log.txt", log_message);
 			free(log_message);
