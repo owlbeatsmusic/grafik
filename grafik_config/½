@@ -1,0 +1,2 @@
+event_device=/dev/input/event1533
+mouse_device=/dev/input/mouse0

@@ -99,9 +99,13 @@ int main() {
 	scanf("%c", &input_char);
 	printf("input_char=%c\n", input_char);	
 	fflush(stdout);
-	printf("keyboard input device detected: \"/dev/input/event%d\"\n", current_event_device_number);
 	
-	grafik_config_set_string("grafik_config/config.ini", "event_device", "hejsan");		
+	char file_path[32];
+	sprintf(file_path, "/dev/input/event%d", current_event_device_number);
+
+	printf("keyboard input device detected: \"%s\"\n", file_path);
+	
+	grafik_config_set_string("grafik_config/config.ini", "event_device", file_path);		
 
 	for (int i = 0; i < devices; i++) {
 		pthread_cancel(threads[i]);

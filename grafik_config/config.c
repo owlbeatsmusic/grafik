@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#define KEY_VALUE_SETS_SIZE 5
+#define KEY_VALUE_SETS_SIZE 64
 #define KEY_VALUE_SET_BUFFER_SIZE 128
 
 typedef struct {
@@ -12,10 +12,14 @@ typedef struct {
 } KeyValueSet;
 
 int grafik_config_parse_internal(char *file_content, int file_length, KeyValueSet key_value_sets[]) {
+	
 	char temp_buf[128];
 	memset(temp_buf, 0, sizeof(temp_buf)); // clear temp_buf
+	printf("temp_buf=\"%s\"\n", temp_buf);
+	
 	int temp_buf_index = 0;
 	int key_value_sets_index = 0;
+
 	for (int i = 0; i < file_length+1; i++) {
 		if (file_content[i] == '=') {
 			strcpy(key_value_sets[key_value_sets_index].key_buffer, temp_buf);
@@ -65,11 +69,6 @@ int grafik_config_get_string(char *file_path, char *key, char *destination_buffe
 	
 	grafik_config_parse_internal(file_content, file_length, key_value_sets);
 
-	// print the key_value_sets array
-	for (int i = 0; i < KEY_VALUE_SETS_SIZE; i++) {
-		printf("%d:\n   key  : %s\n   value: %s\n", i, key_value_sets[i].key_buffer, key_value_sets[i].value_buffer);
-	}
-	
 	// find matching key and set destination buffer
 	for (int i = 0; i < KEY_VALUE_SETS_SIZE; i++) {
 		if (strcmp(key_value_sets[i].key_buffer, key) != 0) continue;
@@ -79,41 +78,12 @@ int grafik_config_get_string(char *file_path, char *key, char *destination_buffe
 		break;
 	}
 
-	/*; 
-
-	char *result = strstr(file_content, key);
-	
-	int position = -1;
-	if (result != NULL) {
-		position = result - file_content;
-	}
-
-	int index = 0;
-	int j = 0;
-	while (file_content[position+j] != '\n' && file_content[position+j] != '\0') {
-		if (file_content[position+j] != key[j] && file_content[position+j] != '=') {
-			line_buf[index] = file_content[position+j];
-			index++;
-		} 
-		j++;
-	}
-	line_buf[index] = '\0';
-
-	free(file_content);
-	fclose(file);	
-
-	for (int i = 0; i < sizeof(line_buf); i++) {
-		destination_buffer[i] = line_buf[i];
-	}
-
-	*/
-
 	return 0;
 }
 
 
 int grafik_config_set_string(char *file_path, char *key, char *value) {	
-	FILE *file = fopen(file_path, "rw"); 
+	FILE *file = fopen(file_path, "r"); 
 	if (file == NULL) {
 		printf("error: failed to open config file(%s)\n", file_path);
 		return -1;
@@ -134,40 +104,42 @@ int grafik_config_set_string(char *file_path, char *key, char *value) {
 	file_content[file_length] = '\0';
 	
 	KeyValueSet key_value_sets[KEY_VALUE_SETS_SIZE];
-	
-	/*
-	char temp_buf[255];
-	memset(temp_buf, 0, sizeof(temp_buf)); // clear temp_buf
-	int temp_buf_index = 0;
-	int key_value_sets_index = 0;
-	for (int i = 0; i < file_length+1; i++) {
-		if (file_content[i] == '=') {
-			strcpy(key_value_sets[key_value_sets_index].key_buffer, temp_buf);
-		}
-		if (file_content[i] == '\n') {
-			strcpy(key_value_sets[key_value_sets_index].value_buffer, temp_buf);
-			key_value_sets_index++;
-		}
-		if (file_content[i] == '=' || file_content[i] == '\n') {
-			memset(temp_buf, 0, sizeof(temp_buf)); // clear temp_buf
-			temp_buf_index = 0;
-			i++;
-		}
-		temp_buf[temp_buf_index] = file_content[i];
-		temp_buf_index++;
-	}
-
-	*/
 
 	grafik_config_parse_internal(file_content, file_length, key_value_sets);
 
-	// print the key_value_sets array
+	
+	// find matching key and set value
 	for (int i = 0; i < KEY_VALUE_SETS_SIZE; i++) {
-		printf("%d:\n   key  : %s\n   value: %s\n", i, key_value_sets[i].key_buffer, key_value_sets[i].value_buffer);
+		if (strcmp(key_value_sets[i].key_buffer, key) != 0) continue;
+		memset(key_value_sets[i].value_buffer, 0, sizeof(key_value_sets[i].value_buffer));
+		for (int j = 0; j < strlen(value); j++) {
+			key_value_sets[i].value_buffer[j] = value[j];
+		}
+		break;
 	}
 
+
+	// write back to file
 	free(file_content);
 	fclose(file);
+	
+	file = fopen(file_path, "w"); 
+	if (file == NULL) {
+		printf("error: failed to open config file(%s)\n", file_path);
+		return -1;
+	}
+	for (int i = 0; i < KEY_VALUE_SETS_SIZE; i++) {
+		if (strlen(key_value_sets[i].key_buffer) == 0 || 
+		   (strlen(key_value_sets[i].key_buffer) == 1 && (int)key_value_sets[i].key_buffer[0] == strlen(value))) continue;
+		printf("%s=%s\n", key_value_sets[i].key_buffer, key_value_sets[i].value_buffer);
+		fprintf(file, "%s=%s\n", key_value_sets[i].key_buffer, key_value_sets[i].value_buffer);
+	}
+
+	// print the key_value_sets array
+	for (int i = 0; i < KEY_VALUE_SETS_SIZE; i++) {
+		printf("%d:\n   key  : %d\n   value: %s\n", i, (int)key_value_sets[i].key_buffer[0], key_value_sets[i].value_buffer);
+	}
+
 	
 	return 0;
 }
