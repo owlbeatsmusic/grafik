@@ -5,7 +5,7 @@
 #include <sys/ioctl.h>             // I/O control
 #include <sys/mman.h>              // Memory mapping files into memory
 #include <linux/fb.h>              // to use the framebuffer device
-#include <termios.h>		   // disable text input
+#include <termios.h>               // disable text input
 #include <pthread.h>	           // multithreading for input
 #include <stdlib.h>                // 
 #include <stdint.h>                // for example: uint8_t
@@ -14,6 +14,7 @@
 #include <fcntl.h>                 // file control
 #include <stdio.h>                 // 
 #include <time.h>                  // for log timestamps
+#include <math.h>                  //
 
 typedef struct {
 	uint8_t r;
@@ -22,10 +23,25 @@ typedef struct {
 	uint8_t a;
 } Color;
 
+typedef struct {
+	float x;
+	float y;
+	float z;
+} Point3D;
+
+typedef struct {
+	float x;
+	float y;
+	float z;
+	float pitch;
+	float yaw;
+	float roll;
+} Camera;
 
 uint8_t *fb_data;
 int fb_width;
 int fb_height;
+
 void grafik_draw_pixel(int x, int y, Color color) {
 	int offset = (y * (fb_width+ 10) + x) * 4;
 
@@ -68,6 +84,23 @@ int grafik_draw_line(int x1, int y1, int x2, int y2, int width, Color color) {
 		else is_not_complete = temp_x > x2;
 	}
 
+}
+
+// rotate yaw (camera: left / right)
+void rotateY(Point3D *point, float angle) {
+	float cosA = cos(angle);
+	float sinA = sin(angle);
+	float x = point->x;
+	float z = point->z;
+
+	point->x = x * cosA - z * sinA;
+	point->z = x * sinA - z * cosA;
+}
+
+void translate(Point3D *point, float dx, float dy, float dz) {
+	point->x += dx;
+	point->y += dy;
+	point->z += dz;
 }
 
 
@@ -145,6 +178,22 @@ int main() {
 	}
 	*/
 
+	Point3D points[] = {
+		{1.0, 0.0, -2.0},
+		{0.0, 1.0, -2.0},
+		{-1.0, 0.0, -2.0},
+		{0.0, -1.0, -2.0}
+	};
+
+	Camera camera = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+	/*
+	float angle = M_PI / 4.0;
+	float translationX = 2.0;
+	float translationY = 0.0;
+	float translationZ = 0.0;
+	*/
+
 	Color color_red  = {255, 0, 0, 0};
 	Color color_green  = {0, 255, 0, 0};
 	Color color_blue  = {0, 0, 255, 0};
@@ -152,13 +201,17 @@ int main() {
 	//grafik_draw_pixel(0, 0, color_red);
 
 
-	for (int i = 0; i < 300; i += 1) {
+	for (int i = 0; i < 300; i += 10) {
 		memset(fb_data, 0, fb_data_size);
-		grafik_fill_rect(150+i, 150, 100, 100, color_red);
-		grafik_draw_line(100, 50, 300+(i*2), 60+(i*3), 1, color_white);
-		usleep(10000);
-	}
 
+		// TODO: draw points to screen	
+
+		//grafik_fill_rect(150+i, 150, 100, 100, color_red);
+		//grafik_draw_line(100, 50, 300+(i*2), 60+(i*3), 1, color_white);
+		usleep(1);
+	}
+	
+	
 
 	// unmap and close
 	
