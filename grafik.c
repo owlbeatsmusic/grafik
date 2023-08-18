@@ -35,13 +35,41 @@ void grafik_draw_pixel(int x, int y, Color color) {
 	fb_data[offset+3] = color.a;  
 }
 
-void grafik_fill_rect(int x, int y, int width, int height, Color color) {
+int grafik_fill_rect(int x, int y, int width, int height, Color color) {
 	for (int local_y = 0; local_y < height; local_y++) {
 		for (int local_x = 0; local_x < width; local_x++) {
 			grafik_draw_pixel(x+local_x, y+local_y, color);
 		}
 	}
 }
+
+int grafik_draw_line(int x1, int y1, int x2, int y2, int width, Color color) {
+	int dx = x2 - x1;
+	int dy = y2 - y1;
+	float k = (float)dy / (float)dx;
+	int m = y1 - k * x1;
+	
+	int temp_x = x1;
+	int temp_y = y1;
+	int is_not_complete = 1;
+	
+	while (is_not_complete) {
+		//printf("draw_line pixel at : (%d, %d)\n", temp_x, temp_y);
+		grafik_draw_pixel(temp_x, temp_y, color);
+		grafik_draw_pixel(temp_x, temp_y+1, color);
+		grafik_draw_pixel(temp_x, temp_y+2, color);
+		
+		if (k < 1) temp_x++;
+		else temp_x--;
+	
+		temp_y = k * temp_x + m;
+		
+		if (k < 1) is_not_complete = temp_x < x2;
+		else is_not_complete = temp_x > x2;
+	}
+
+}
+
 
 void *keyboard_input_thread(void *arg) {
 	grafik_input_keyboard_start();	
@@ -122,11 +150,13 @@ int main() {
 	Color color_blue  = {0, 0, 255, 0};
 	Color color_white  = {255, 255, 255, 0};
 	//grafik_draw_pixel(0, 0, color_red);
-	
-	for (int i = 0; i < 300; i += 60) {
+
+
+	for (int i = 0; i < 300; i += 1) {
 		memset(fb_data, 0, fb_data_size);
 		grafik_fill_rect(150+i, 150, 100, 100, color_red);
-		sleep(1);
+		grafik_draw_line(100, 50, 300+(i*2), 60+(i*3), 1, color_white);
+		usleep(10000);
 	}
 
 
