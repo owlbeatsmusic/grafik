@@ -101,7 +101,7 @@ int main() {
 	fflush(stdout);
 	printf("keyboard input device detected: \"/dev/input/event%d\"\n", current_event_device_number);
 	
-	
+	grafik_config_set_string("grafik_config/config.ini", "event_device", "hejsan");		
 
 	for (int i = 0; i < devices; i++) {
 		pthread_cancel(threads[i]);
