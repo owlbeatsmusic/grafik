@@ -8,10 +8,10 @@
 
 int grafik_input_keyboard_start() {
 	
-	int file_path_size = 64;
+	int file_path_size = 128;
 	char *file_path = (char *)malloc(file_path_size * sizeof(char));
 	grafik_config_get_string("grafik_config/config.ini", "event_device", file_path, file_path_size);
-
+	printf("event_device=%s\n", file_path);
 	grafik_log_print("log.txt", "keyboard input started");
 
 	int fd = open(file_path, O_RDONLY);

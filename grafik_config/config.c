@@ -3,17 +3,42 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#define KEY_VALUE_SETS_SIZE 5
+#define KEY_VALUE_SET_BUFFER_SIZE 128
+
 typedef struct {
-	char key_buffer[255];
-	char value_buffer[255];
+	char key_buffer[KEY_VALUE_SET_BUFFER_SIZE];
+	char value_buffer[KEY_VALUE_SET_BUFFER_SIZE];
 } KeyValueSet;
+
+int grafik_config_parse_internal(char *file_content, int file_length, KeyValueSet key_value_sets[]) {
+	char temp_buf[128];
+	memset(temp_buf, 0, sizeof(temp_buf)); // clear temp_buf
+	int temp_buf_index = 0;
+	int key_value_sets_index = 0;
+	for (int i = 0; i < file_length+1; i++) {
+		if (file_content[i] == '=') {
+			strcpy(key_value_sets[key_value_sets_index].key_buffer, temp_buf);
+		}
+		if (file_content[i] == '\n') {
+			strcpy(key_value_sets[key_value_sets_index].value_buffer, temp_buf);
+			key_value_sets_index++;
+		}
+		if (file_content[i] == '=' || file_content[i] == '\n') {
+			memset(temp_buf, 0, sizeof(temp_buf)); // clear temp_buf
+			temp_buf_index = 0;
+			i++;
+		}
+		temp_buf[temp_buf_index] = file_content[i];
+		temp_buf_index++;
+	}
+}
 
 //void grafik_config_add_string(char *file_path, char *key, char *value) {}
 
 int grafik_config_get_string(char *file_path, char *key, char *destination_buffer, int buffer_size) {
-	char line_buf[60];
-	if (buffer_size < (int)sizeof(line_buf)) {
-		printf("error: destination_buffer too small, need to be over %ld\n", sizeof(line_buf) / sizeof(char));
+	if (buffer_size != KEY_VALUE_SET_BUFFER_SIZE) {
+		printf("error: destination_buffer needs to be %d\n", KEY_VALUE_SET_BUFFER_SIZE);
 		return -1;
 	}
 	FILE *file = fopen(file_path, "r"); 
@@ -36,7 +61,25 @@ int grafik_config_get_string(char *file_path, char *key, char *destination_buffe
 	fread(file_content, file_length, 1, file);
 	file_content[file_length] = '\0';
 
+	KeyValueSet key_value_sets[KEY_VALUE_SETS_SIZE];
+	
+	grafik_config_parse_internal(file_content, file_length, key_value_sets);
 
+	// print the key_value_sets array
+	for (int i = 0; i < KEY_VALUE_SETS_SIZE; i++) {
+		printf("%d:\n   key  : %s\n   value: %s\n", i, key_value_sets[i].key_buffer, key_value_sets[i].value_buffer);
+	}
+	
+	// find matching key and set destination buffer
+	for (int i = 0; i < KEY_VALUE_SETS_SIZE; i++) {
+		if (strcmp(key_value_sets[i].key_buffer, key) != 0) continue;
+		for (int j = 0; j < KEY_VALUE_SET_BUFFER_SIZE; j++) {
+			destination_buffer[j] = key_value_sets[i].value_buffer[j];
+		}
+		break;
+	}
+
+	/*; 
 
 	char *result = strstr(file_content, key);
 	
@@ -63,8 +106,11 @@ int grafik_config_get_string(char *file_path, char *key, char *destination_buffe
 		destination_buffer[i] = line_buf[i];
 	}
 
+	*/
+
 	return 0;
 }
+
 
 int grafik_config_set_string(char *file_path, char *key, char *value) {	
 	FILE *file = fopen(file_path, "rw"); 
@@ -87,10 +133,9 @@ int grafik_config_set_string(char *file_path, char *key, char *value) {
 	fread(file_content, file_length, 1, file);
 	file_content[file_length] = '\0';
 	
-	// 64 = number of sets in config.ini file
-	int key_value_sets_size = 5;
-	KeyValueSet key_value_sets[key_value_sets_size];
+	KeyValueSet key_value_sets[KEY_VALUE_SETS_SIZE];
 	
+	/*
 	char temp_buf[255];
 	memset(temp_buf, 0, sizeof(temp_buf)); // clear temp_buf
 	int temp_buf_index = 0;
@@ -112,8 +157,12 @@ int grafik_config_set_string(char *file_path, char *key, char *value) {
 		temp_buf_index++;
 	}
 
+	*/
+
+	grafik_config_parse_internal(file_content, file_length, key_value_sets);
+
 	// print the key_value_sets array
-	for (int i = 0; i < key_value_sets_size; i++) {
+	for (int i = 0; i < KEY_VALUE_SETS_SIZE; i++) {
 		printf("%d:\n   key  : %s\n   value: %s\n", i, key_value_sets[i].key_buffer, key_value_sets[i].value_buffer);
 	}
 
