@@ -1,4 +1,6 @@
 # Grafik
+This projects not finished, it's not reccomended to it.
+
 Small graphcis library using linux framebuffer. Also includes custom logging tool, .ini read/write tool and a input tool. Made for learing. (The grafik_input, grafik_log & grafik_config *should* both work separately in other projetcs.) 
 
 This project uses no external libraries.
